@@ -1,22 +1,19 @@
-import axios from 'axios';
 import './App.css';
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchUsers, addUser, editUser, deleteUser } from './api/Endpoints';
 
-// Kullanıcı tipi tanımlaması
+
 interface User {
   id: string;
   name: string;
   avatar?: string;
-
 }
 
-// Yeni kullanıcı tipi tanımlaması
 interface NewUser {
   name: string;
   avatar: string;
 }
 
-// Güncellenen kullanıcı tipi tanımlaması
 interface UpdateUser extends NewUser {
   id: string;
 }
@@ -27,56 +24,14 @@ function App() {
   const [updateUser, setUpdateUser] = useState<UpdateUser>({ id: '', name: '', avatar: '' });
   const [isEdit, setIsEdit] = useState<boolean>(false);
 
-  const apiUrl = 'https://6710c22fa85f4164ef2f2bbd.mockapi.io/kullaniciler';
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get<User[]>(apiUrl);
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Kullanıcıları getirirken hata oluştu:', error);
-    }
-  };
-
-  const addUser = async () => {
-    try {
-      const response = await axios.post<User>(apiUrl, newUser);
-      setUsers([...users, response.data]);
-      setNewUser({ name: '', avatar: '' });
-    } catch (error) {
-      console.error('Kullanıcı eklerken hata oluştu:', error);
-    }
-  };
-
-  const editUser = async (id: string) => {
-    try {
-      const response = await axios.put<User>(`${apiUrl}/${id}`, updateUser);
-      setUsers(users.map(user => (user.id === id ? response.data : user)));
-      setUpdateUser({ id: '', name: '', avatar: '' });
-      setIsEdit(false);
-    } catch (error) {
-      console.error('Kullanıcıyı güncellerken hata oluştu:', error);
-    }
-  };
-
-  const deleteUser = async (id: string) => {
-    try {
-      await axios.delete(`${apiUrl}/${id}`);
-      setUsers(users.filter(user => user.id !== id));
-    } catch (error) {
-      console.error('Kullanıcı silerken hata oluştu:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
+    fetchUsers().then(setUsers);
   }, []);
 
   const handleEdit = (user: User) => {
-  setUpdateUser({ id: user.id, name: user.name, avatar: user.avatar || '' });
-  setIsEdit(true);
-};
-
+    setUpdateUser({ id: user.id, name: user.name, avatar: user.avatar || '' });
+    setIsEdit(true);
+  };
 
   return (
     <div className='w-full'>
@@ -94,7 +49,7 @@ function App() {
            
             <div className="flex flex-row mt-4 space-x-2">
               <button
-                onClick={() => deleteUser(user.id)}
+                onClick={() => deleteUser(user.id, users, setUsers)}
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
               >
                 Sil
@@ -126,7 +81,9 @@ function App() {
           />
 
           <button
-            onClick={() => isEdit ? editUser(updateUser.id) : addUser()}
+            onClick={() => isEdit
+              ? editUser(updateUser.id, updateUser, users, setUsers, setUpdateUser, setIsEdit)
+              : addUser(newUser, users, setUsers, setNewUser)}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
           >
             {isEdit ? 'Güncelle' : 'Ekle'}
