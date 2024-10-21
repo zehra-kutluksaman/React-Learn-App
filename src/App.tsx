@@ -35,7 +35,7 @@ function App() {
 
   return (
     <div className='w-full'>
-      <h1 className="text-3xl font-bold mb-6 text-center">Kullanıcılar</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Users</h1>
 
       <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-8 mb-8 w-full">
         {users.map(user => (
